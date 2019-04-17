@@ -22,7 +22,7 @@ public class Game extends JFrame {
             }
         };
 
-        Timer timer = new Timer(16,listener);
+        Timer timer = new Timer(0,listener);
 
         timer.start();
 
@@ -56,5 +56,7 @@ public class Game extends JFrame {
         renderer.screen.fill(Color.BLACK);
         renderer.renderMap();
         inputManager.movePlayer(player);
+
+        player.preventCollisions(map);
     }
 }

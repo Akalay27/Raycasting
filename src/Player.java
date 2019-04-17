@@ -47,9 +47,16 @@ public class Player {
         angle = MapRenderer.boundAngle(angle);
     }
 
-    void translateDirection(double offset, double magnitude) {
+    private void translateDirection(double offset, double magnitude) {
         y += Math.sin(angle+offset)*magnitude;
         x += Math.cos(angle+offset)*magnitude;
+    }
+
+
+    public void preventCollisions (Map map) {
+
+
+
     }
 
 }
