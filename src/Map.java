@@ -109,6 +109,20 @@ public class Map {
         return (int)Math.ceil(Math.sqrt(Math.pow(tilesX,2) + Math.pow(tilesY,2)));
     }
 
+    public void preventCollisions (Player player) {
+        int playerTileX = (int)player.x;
+        int playerTileY = (int)player.y;
+
+        if (wallGrid[playerTileX][playerTileY] == 1) {
+
+
+        }
+
+
+    }
+
+
+
 
 
 

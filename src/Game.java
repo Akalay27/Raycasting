@@ -57,6 +57,8 @@ public class Game extends JFrame {
         renderer.renderMap();
         inputManager.movePlayer(player);
 
-        player.preventCollisions(map);
+        map.preventCollisions(player);
     }
+
+
 }

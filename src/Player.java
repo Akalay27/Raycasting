@@ -53,10 +53,5 @@ public class Player {
     }
 
 
-    public void preventCollisions (Map map) {
-
-
-
-    }
 
 }
