@@ -58,7 +58,9 @@ public class Game extends JFrame {
         inputManager.movePlayer(player);
 
         map.preventCollisions(player);
+
     }
+
 
 
 }

@@ -37,8 +37,10 @@ public class DirectDraw extends JPanel {
                 if (x >= 0 && x < canvas.getWidth() && y >= 0 && y < canvas.getHeight())
                     canvas.setRGB(x,y,c.getRGB());
             }
+
         }
     }
+
 
 
 

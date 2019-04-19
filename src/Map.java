@@ -1,3 +1,5 @@
+import java.awt.*;
+
 import static java.lang.Math.abs;
 import static java.lang.Math.tan;
 
@@ -5,6 +7,10 @@ public class Map {
     private int[][] wallGrid;
     public int tilesX;
     public int tilesY;
+
+
+
+
 
 
     public Map(int tileX,int tileY) {
@@ -30,7 +36,7 @@ public class Map {
 
     }
 
-    public double[] castRay(double x, double y, double angle, int castLimit) {
+    public HitPoint castRay(double x, double y, double angle, int castLimit) {
 
         int tileX = (int)x;
         int tileY = (int)y;
@@ -68,7 +74,7 @@ public class Map {
         for (int i = 0; i < castLimit; i++) {
             while ((directionY == 1 && yIntercept[1] <= xIntercept[1]) || (directionY == -1 && yIntercept[1] >= xIntercept[1])) {
 
-                if (wallGrid[(int)yIntercept[0]-(1-shiftX)][(int)yIntercept[1]] > 0) return yIntercept;
+                if (wallGrid[(int)yIntercept[0]-(1-shiftX)][(int)yIntercept[1]] > 0) return new HitPoint(yIntercept,1);
 
                 yIntercept[0]+=directionX;
                 yIntercept[1]+=yStep;
@@ -76,7 +82,7 @@ public class Map {
             }
             while ((directionX == 1 && xIntercept[0] <= yIntercept[0]) || (directionX == -1 && xIntercept[0] >=  yIntercept[0])) {
 
-                if (wallGrid[(int)xIntercept[0]][(int)xIntercept[1]-(1-shiftY)] > 0) return xIntercept;
+                if (wallGrid[(int)xIntercept[0]][(int)xIntercept[1]-(1-shiftY)] > 0) return new HitPoint(xIntercept,0);
 
                 xIntercept[0]+=xStep;
                 xIntercept[1]+=directionY;
@@ -85,7 +91,7 @@ public class Map {
 
         }
 
-        return new double[]{1.0,1.0};
+        return new HitPoint(new double[]{0.0},0);
     }
     public String toString() {
         /* implement way to print map to console using ascii white and black blocks or just 1/0. */
@@ -110,20 +116,27 @@ public class Map {
     }
 
     public void preventCollisions (Player player) {
-        int playerTileX = (int)player.x;
-        int playerTileY = (int)player.y;
+        double[] pushCenter = {0.5,0.5};
+        double pushStep = 0.01;
 
-        if (wallGrid[playerTileX][playerTileY] == 1) {
-
-
+        if (wallGrid[(int)player.x][(int)player.y] > 0) {
+            double[] difference = {player.x%1-pushCenter[0],player.y%1-pushCenter[1]};
+            double pushAngle = Math.atan2(difference[1],difference[0]);
+            while (wallGrid[(int)player.x][(int)player.y] > 0) {
+                player.x+=Math.cos(pushAngle)*pushStep;
+                player.y+=Math.sin(pushAngle)*pushStep;
+            }
         }
-
-
     }
 
+    class HitPoint {
+        double[] point;
+        int side;
 
-
-
-
+        public HitPoint (double[] pt, int s) {
+            point = pt;
+            side =s;
+        }
+    }
 
 }
