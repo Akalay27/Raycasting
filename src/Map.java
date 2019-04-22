@@ -1,27 +1,27 @@
 import java.awt.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.tan;
 
 public class Map {
     private int[][] wallGrid;
-    public int tilesX;
-    public int tilesY;
 
-
-
-
-
-
-    public Map(int tileX,int tileY) {
-        tilesX = tileX;
-        tilesY = tileY;
-        wallGrid = new int[tilesX][tilesY];
-        generateMap();
-
+    int tilesX;
+    int tilesY;
+    public Map() {
+        loadMap("maps/map1.txt");
     }
 
     private void generateMap () {
+
+        tilesX = 32;
+        tilesY = 32;
+        wallGrid = new int[tilesX][tilesY];
         for (int x = 0; x < tilesX; x++) {
             for (int y = 0; y < tilesY; y++) {
                 //Border with random walls inside
@@ -33,6 +33,50 @@ public class Map {
 
             }
         }
+
+    }
+
+    private void loadMap(String filename) {
+        File file = new File(filename);
+
+        try {
+            tilesY = 0;
+            String w;
+            BufferedReader ctLines = new BufferedReader(new FileReader(file));
+            boolean firstLn = true;
+            while ((w=ctLines.readLine()) != null) {
+                if (firstLn) {
+                    tilesX = w.length();
+                    firstLn = false;
+                }
+                tilesY++;
+            }
+            wallGrid = new int[tilesX][tilesY];
+            ctLines.close();
+            BufferedReader map = new BufferedReader(new FileReader(file));
+
+            String ln;
+            int y = 0;
+            System.out.println("Tiles " + tilesX + "x" + tilesY);
+            while ((ln = map.readLine()) != null) {
+                System.out.println(ln);
+               for (int x = 0; x < tilesX; x++) {
+                   wallGrid[x][y] = Character.getNumericValue(ln.charAt(x));
+               }
+               y++;
+
+            }
+
+
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+
+
+
+
 
     }
 
@@ -73,16 +117,16 @@ public class Map {
 
         for (int i = 0; i < castLimit; i++) {
             while ((directionY == 1 && yIntercept[1] <= xIntercept[1]) || (directionY == -1 && yIntercept[1] >= xIntercept[1])) {
-
-                if (wallGrid[(int)yIntercept[0]-(1-shiftX)][(int)yIntercept[1]] > 0) return new HitPoint(yIntercept,1);
+                int hitTile = wallGrid[(int)yIntercept[0]-(1-shiftX)][(int)yIntercept[1]];
+                if (hitTile > 0) return new HitPoint(yIntercept,1,hitTile,directionX);
 
                 yIntercept[0]+=directionX;
                 yIntercept[1]+=yStep;
 
             }
             while ((directionX == 1 && xIntercept[0] <= yIntercept[0]) || (directionX == -1 && xIntercept[0] >=  yIntercept[0])) {
-
-                if (wallGrid[(int)xIntercept[0]][(int)xIntercept[1]-(1-shiftY)] > 0) return new HitPoint(xIntercept,0);
+                int hitTile = wallGrid[(int)xIntercept[0]][(int)xIntercept[1]-(1-shiftY)];
+                if (hitTile > 0) return new HitPoint(xIntercept,0,hitTile,directionY);
 
                 xIntercept[0]+=xStep;
                 xIntercept[1]+=directionY;
@@ -91,7 +135,7 @@ public class Map {
 
         }
 
-        return new HitPoint(new double[]{0.0},0);
+        return new HitPoint(new double[]{0.0},0,0,0);
     }
     public String toString() {
         /* implement way to print map to console using ascii white and black blocks or just 1/0. */
@@ -132,10 +176,14 @@ public class Map {
     class HitPoint {
         double[] point;
         int side;
-
-        public HitPoint (double[] pt, int s) {
+        int texture;
+        int shading;
+        public HitPoint (double[] pt, int s, int tex, int sh) {
             point = pt;
-            side =s;
+            side = s;
+            texture = tex-1;
+            // 0 +y  1 +x  2  -y  3 -x
+
         }
     }
 

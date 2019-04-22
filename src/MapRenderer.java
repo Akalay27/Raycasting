@@ -1,6 +1,8 @@
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 
@@ -10,26 +12,46 @@ public class MapRenderer {
     Map map;
     DirectDraw screen;
     private Player player;
-    private double POV = Math.PI/4;
+    private double POV = Math.PI/4+0.3;
     private int castLimit;
 
-    BufferedImage[] textures = new BufferedImage[1];
-    int textureSize = 200;
+    BufferedImage[][] textures;
+    double textureSize = 400;
     public MapRenderer (Map m, Player p) {
         map = m;
         player = p;
         screen = new DirectDraw(Game.SCREEN_WIDTH,Game.SCREEN_HEIGHT);
         castLimit = m.getSize()*2;
 
-        loadTextures(new String[]{"minecraft.png"});
+        loadTextures(new String[]{"stonebrick.png","wood.png","diamond.png","iron.png"});
     }
 
     private void loadTextures (String[] filenames) {
+        float[] shading = new float[]{1f,0.75f,0.80f,1f};
+
+        textures = new BufferedImage[filenames.length][4];
         for (int f = 0; f < filenames.length; f++) {
             try {
-                File pathToFile = new File("minecraft.png");
+                File pathToFile = new File("textures/" + filenames[f]);
                 BufferedImage tex = ImageIO.read(pathToFile);
-                textures[f] = tex;
+
+                for (int s = 0; s < 4; s++) {
+                    BufferedImage shaded = deepCopy(tex);
+
+                    for (int y = 0; y < tex.getHeight(); y++) {
+                        for (int x = 0; x < tex.getWidth(); x++) {
+                            Color col = new Color(tex.getRGB(x,y));
+                            float[] component = new float[3];
+                            col.getColorComponents(component);
+
+                            shaded.setRGB(x,y,new Color(component[0]*shading[s],component[1]*shading[s],component[2]*shading[s]).getRGB());
+                        }
+                    }
+                    System.out.println(shading[s]);
+                    textures[f][s] = shaded;
+
+                }
+
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -61,9 +83,12 @@ public class MapRenderer {
             } else if (hitPoint.side == 0) {
                 texAcross = (int)(hitPoint.point[0]%1*textureSize);
             }
-            drawTextureSlice(0,w,texAcross,(int)constrain(rectHeight,0,Game.SCREEN_HEIGHT/3));
+
+            drawTextureSlice(hitPoint.texture,w,texAcross,(int)rectHeight,hitPoint.shading);
 
         }
+
+
         screen.repaint();
     }
 
@@ -84,17 +109,38 @@ public class MapRenderer {
     }
 
 
-    private void drawTextureSlice(int texture, int pos,int xTex, int size) {
+    private void drawTextureSlice(int texture, int pos,int xTex, int size,int shading) {
 
-        int[] slice = new int[size];
+        int[] slice = new int[(int) constrain(size, 0, Game.SCREEN_HEIGHT)];
+        double texRatio = textureSize / size;
 
-        for (int y = 0; y < size; y++) {
-            System.out.println(y);
-            slice[y] = textures[texture].getRGB(xTex,y*(textureSize/size));
+
+        if (size > Game.SCREEN_HEIGHT) { // if the wallHeight is greater than the height of the screen then only use part of the size value.
+            int start = size / 2 - Game.SCREEN_HEIGHT / 2;
+            for (int y = 0; y < Game.SCREEN_HEIGHT; y++) {
+                slice[y] = textures[texture][shading].getRGB(xTex, (int) (texRatio * (start + y)));
+            }
+        } else {
+            for (int y = 0; y < size; y++)
+                slice[y] = textures[texture][shading].getRGB(xTex, (int) (texRatio * (y)));
         }
+        screen.canvas.setRGB(pos,Game.SCREEN_HEIGHT/2-slice.length/2,1,slice.length,slice,0,1);
 
-        screen.canvas.setRGB(pos,Game.SCREEN_HEIGHT/2-size/2,1,size,slice,0,size);
+//        for (int s = 0; s < slice.length; s++) {
+//            screen.setRGB(pos,Game.SCREEN_HEIGHT/2-slice.length/2+s,slice[s]);
+//        }
+
     }
+
+    static BufferedImage deepCopy(BufferedImage bi) {
+        ColorModel cm = bi.getColorModel();
+        boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
+        WritableRaster raster = bi.copyData(null);
+        return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
+    }
+
+
+
 
 
 

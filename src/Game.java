@@ -6,7 +6,7 @@ import java.awt.event.ActionListener;
 
 public class Game extends JFrame {
 
-    static int SCREEN_WIDTH = 600;
+    static int SCREEN_WIDTH = 900;
     static int SCREEN_HEIGHT = 600;
 
     private MapRenderer renderer;
@@ -32,7 +32,7 @@ public class Game extends JFrame {
     public Game () {
 
 
-        map = new Map(32,32);
+        map = new Map();
         player = new Player(16,16,Math.PI/4);
         renderer = new MapRenderer(map,player);
 
